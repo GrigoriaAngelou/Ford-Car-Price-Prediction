@@ -1,0 +1,1194 @@
+<section id="ford-car-price-prediction" class="cell markdown">
+<h1>Ford Car Price Prediction</h1>
+<p>In this notebook we are going to use a dataset that contains different informations about Ford models and their prices. We will explore and clean the dataset and then using sklearn library we will split the data into training and test and we will use two regressions models (linear and forest regression models) to make predictions about the car prices. <br> <br> <strong>You can find my article in medium where I explain step by step my process. <br> <a href="https://medium.com/@ritaaggelou/train-test-split-in-python-a-step-by-step-guide-with-example-for-accurate-model-evaluation-53741204ff7d" class="uri">https://medium.com/@ritaaggelou/train-test-split-in-python-a-step-by-step-guide-with-example-for-accurate-model-evaluation-53741204ff7d</a></strong></p>
+</section>
+<div class="cell code" data-execution_count="1" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.211387Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:22.158309Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:22.158344Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.212475Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:22.157946Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="co"># import required libraries</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="im">import</span> pandas <span class="im">as</span> pd </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="im">import</span> sklearn</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestRegressor</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler, LabelEncoder</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a><span class="im">from</span> sklearn <span class="im">import</span> linear_model</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span></code></pre></div>
+</div>
+<section id="cleaning-dataset" class="cell markdown">
+<h1>Cleaning Dataset</h1>
+</section>
+<div class="cell code" data-execution_count="2" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.281800Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.214181Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.214213Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.282986Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.213746Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;/kaggle/input/ford-car-price-prediction/ford.csv&#39;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>df.head()</span></code></pre></div>
+<div class="output execute_result" data-execution_count="2">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>price</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Fiesta</td>
+      <td>2017</td>
+      <td>12000</td>
+      <td>Automatic</td>
+      <td>15944</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Focus</td>
+      <td>2018</td>
+      <td>14000</td>
+      <td>Manual</td>
+      <td>9083</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Focus</td>
+      <td>2017</td>
+      <td>13000</td>
+      <td>Manual</td>
+      <td>12456</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>17500</td>
+      <td>Manual</td>
+      <td>10460</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>16500</td>
+      <td>Automatic</td>
+      <td>1482</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="3" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.321005Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.285387Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.285415Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.322308Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.285065Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a>df.info()</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+RangeIndex: 17966 entries, 0 to 17965
+Data columns (total 9 columns):
+ #   Column        Non-Null Count  Dtype  
+---  ------        --------------  -----  
+ 0   model         17966 non-null  object 
+ 1   year          17966 non-null  int64  
+ 2   price         17966 non-null  int64  
+ 3   transmission  17966 non-null  object 
+ 4   mileage       17966 non-null  int64  
+ 5   fuelType      17966 non-null  object 
+ 6   tax           17966 non-null  int64  
+ 7   mpg           17966 non-null  float64
+ 8   engineSize    17966 non-null  float64
+dtypes: float64(2), int64(4), object(3)
+memory usage: 1.2+ MB
+</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="4" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.337932Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.324734Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.324776Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.339183Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.324333Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="co"># checking for Null Values</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>df.isna().<span class="bu">sum</span>()</span></code></pre></div>
+<div class="output execute_result" data-execution_count="4">
+<pre><code>model           0
+year            0
+price           0
+transmission    0
+mileage         0
+fuelType        0
+tax             0
+mpg             0
+engineSize      0
+dtype: int64</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="5" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.367205Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.341505Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.341673Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.368528Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.341098Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a>df</span></code></pre></div>
+<div class="output execute_result" data-execution_count="5">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>price</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Fiesta</td>
+      <td>2017</td>
+      <td>12000</td>
+      <td>Automatic</td>
+      <td>15944</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Focus</td>
+      <td>2018</td>
+      <td>14000</td>
+      <td>Manual</td>
+      <td>9083</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Focus</td>
+      <td>2017</td>
+      <td>13000</td>
+      <td>Manual</td>
+      <td>12456</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>17500</td>
+      <td>Manual</td>
+      <td>10460</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>16500</td>
+      <td>Automatic</td>
+      <td>1482</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>17961</th>
+      <td>B-MAX</td>
+      <td>2017</td>
+      <td>8999</td>
+      <td>Manual</td>
+      <td>16700</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>47.1</td>
+      <td>1.4</td>
+    </tr>
+    <tr>
+      <th>17962</th>
+      <td>B-MAX</td>
+      <td>2014</td>
+      <td>7499</td>
+      <td>Manual</td>
+      <td>40700</td>
+      <td>Petrol</td>
+      <td>30</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>17963</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>9999</td>
+      <td>Manual</td>
+      <td>7010</td>
+      <td>Diesel</td>
+      <td>20</td>
+      <td>67.3</td>
+      <td>1.6</td>
+    </tr>
+    <tr>
+      <th>17964</th>
+      <td>KA</td>
+      <td>2018</td>
+      <td>8299</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>57.7</td>
+      <td>1.2</td>
+    </tr>
+    <tr>
+      <th>17965</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>8299</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>22</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>17966 rows × 9 columns</p>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="6" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.383587Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.370019Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.370046Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.384864Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.369708Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="co"># checking for negative values in price</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a>(df[<span class="st">&#39;price&#39;</span>] <span class="op">&lt;</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span></code></pre></div>
+<div class="output execute_result" data-execution_count="6">
+<pre><code>0</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="7" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.417400Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.386403Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.386444Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.418828Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.385978Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="co"># rearrange columns</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true"></a>df <span class="op">=</span> df.iloc[:, [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">2</span>]]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true"></a>df</span></code></pre></div>
+<div class="output execute_result" data-execution_count="7">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+      <th>price</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Fiesta</td>
+      <td>2017</td>
+      <td>Automatic</td>
+      <td>15944</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>12000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Focus</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>9083</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>14000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Focus</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>12456</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>13000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Manual</td>
+      <td>10460</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+      <td>17500</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Automatic</td>
+      <td>1482</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+      <td>16500</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>17961</th>
+      <td>B-MAX</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>16700</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>47.1</td>
+      <td>1.4</td>
+      <td>8999</td>
+    </tr>
+    <tr>
+      <th>17962</th>
+      <td>B-MAX</td>
+      <td>2014</td>
+      <td>Manual</td>
+      <td>40700</td>
+      <td>Petrol</td>
+      <td>30</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>7499</td>
+    </tr>
+    <tr>
+      <th>17963</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>7010</td>
+      <td>Diesel</td>
+      <td>20</td>
+      <td>67.3</td>
+      <td>1.6</td>
+      <td>9999</td>
+    </tr>
+    <tr>
+      <th>17964</th>
+      <td>KA</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>57.7</td>
+      <td>1.2</td>
+      <td>8299</td>
+    </tr>
+    <tr>
+      <th>17965</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>22</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>8299</td>
+    </tr>
+  </tbody>
+</table>
+<p>17966 rows × 9 columns</p>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="8" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.436067Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.421806Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.421834Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.437271Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.421516Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="co"># checking for duplicates</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>df.duplicated().<span class="bu">sum</span>()</span></code></pre></div>
+<div class="output execute_result" data-execution_count="8">
+<pre><code>154</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="9" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.472703Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.439638Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.439682Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.474186Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.439116Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="co">#dropping duplicate values</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>df <span class="op">=</span> df.drop_duplicates().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>df</span></code></pre></div>
+<div class="output execute_result" data-execution_count="9">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+      <th>price</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Fiesta</td>
+      <td>2017</td>
+      <td>Automatic</td>
+      <td>15944</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>12000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Focus</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>9083</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>14000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Focus</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>12456</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>13000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Manual</td>
+      <td>10460</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+      <td>17500</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Automatic</td>
+      <td>1482</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+      <td>16500</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>17807</th>
+      <td>B-MAX</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>16700</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>47.1</td>
+      <td>1.4</td>
+      <td>8999</td>
+    </tr>
+    <tr>
+      <th>17808</th>
+      <td>B-MAX</td>
+      <td>2014</td>
+      <td>Manual</td>
+      <td>40700</td>
+      <td>Petrol</td>
+      <td>30</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>7499</td>
+    </tr>
+    <tr>
+      <th>17809</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>7010</td>
+      <td>Diesel</td>
+      <td>20</td>
+      <td>67.3</td>
+      <td>1.6</td>
+      <td>9999</td>
+    </tr>
+    <tr>
+      <th>17810</th>
+      <td>KA</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>57.7</td>
+      <td>1.2</td>
+      <td>8299</td>
+    </tr>
+    <tr>
+      <th>17811</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>22</td>
+      <td>57.7</td>
+      <td>1.0</td>
+      <td>8299</td>
+    </tr>
+  </tbody>
+</table>
+<p>17812 rows × 9 columns</p>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="10" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.487143Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.475619Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.475653Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.488201Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.475224Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb14"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="co">#checking for miswriting in categorical values</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a><span class="bu">list</span><span class="op">=</span>[<span class="st">&#39;model&#39;</span>,<span class="st">&#39;transmission&#39;</span>,<span class="st">&#39;fuelType&#39;</span>]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">list</span>:</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true"></a>  <span class="bu">print</span>(<span class="st">&quot;Unique values for&quot;</span>,i,<span class="st">&quot;:&quot;</span>, df[i].unique())</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>Unique values for model : [&#39; Fiesta&#39; &#39; Focus&#39; &#39; Puma&#39; &#39; Kuga&#39; &#39; EcoSport&#39; &#39; C-MAX&#39; &#39; Mondeo&#39; &#39; Ka+&#39;
+ &#39; Tourneo Custom&#39; &#39; S-MAX&#39; &#39; B-MAX&#39; &#39; Edge&#39; &#39; Tourneo Connect&#39;
+ &#39; Grand C-MAX&#39; &#39; KA&#39; &#39; Galaxy&#39; &#39; Mustang&#39; &#39; Grand Tourneo Connect&#39;
+ &#39; Fusion&#39; &#39; Ranger&#39; &#39; Streetka&#39; &#39; Escort&#39; &#39; Transit Tourneo&#39; &#39;Focus&#39;]
+Unique values for transmission : [&#39;Automatic&#39; &#39;Manual&#39; &#39;Semi-Auto&#39;]
+Unique values for fuelType : [&#39;Petrol&#39; &#39;Diesel&#39; &#39;Hybrid&#39; &#39;Electric&#39; &#39;Other&#39;]
+</code></pre>
+</div>
+</div>
+<section id="preparing-dataset-for-machine-learning" class="cell markdown">
+<h1>Preparing Dataset for Machine Learning</h1>
+</section>
+<div class="cell code" data-execution_count="11" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.513865Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.489808Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.489850Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.514884Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.489483Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="co"># separate features from target value</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true"></a>X<span class="op">=</span>df.drop([<span class="st">&#39;price&#39;</span>],axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true"></a>y<span class="op">=</span>df[<span class="st">&#39;price&#39;</span>]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true"></a>X</span></code></pre></div>
+<div class="output execute_result" data-execution_count="11">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Fiesta</td>
+      <td>2017</td>
+      <td>Automatic</td>
+      <td>15944</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Focus</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>9083</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Focus</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>12456</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Manual</td>
+      <td>10460</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Fiesta</td>
+      <td>2019</td>
+      <td>Automatic</td>
+      <td>1482</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>17807</th>
+      <td>B-MAX</td>
+      <td>2017</td>
+      <td>Manual</td>
+      <td>16700</td>
+      <td>Petrol</td>
+      <td>150</td>
+      <td>47.1</td>
+      <td>1.4</td>
+    </tr>
+    <tr>
+      <th>17808</th>
+      <td>B-MAX</td>
+      <td>2014</td>
+      <td>Manual</td>
+      <td>40700</td>
+      <td>Petrol</td>
+      <td>30</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>17809</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>7010</td>
+      <td>Diesel</td>
+      <td>20</td>
+      <td>67.3</td>
+      <td>1.6</td>
+    </tr>
+    <tr>
+      <th>17810</th>
+      <td>KA</td>
+      <td>2018</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>145</td>
+      <td>57.7</td>
+      <td>1.2</td>
+    </tr>
+    <tr>
+      <th>17811</th>
+      <td>Focus</td>
+      <td>2015</td>
+      <td>Manual</td>
+      <td>5007</td>
+      <td>Petrol</td>
+      <td>22</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>17812 rows × 8 columns</p>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="12" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.556791Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.516270Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.516312Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.557903Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.515913Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="co"># encode categorical data</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>le<span class="op">=</span>LabelEncoder()</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a><span class="bu">list</span><span class="op">=</span>[<span class="st">&#39;model&#39;</span>,<span class="st">&#39;transmission&#39;</span>,<span class="st">&#39;fuelType&#39;</span>]</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">list</span>:</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true"></a>  X[i]<span class="op">=</span>le.fit_transform(X[i])</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true"></a>  <span class="bu">print</span>(<span class="st">&quot;Unique categorical values for&quot;</span>,i,<span class="st">&quot;:&quot;</span>, df[i].unique())</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true"></a>  <span class="bu">print</span>(<span class="st">&quot;Unique numerical values for&quot;</span>,i,<span class="st">&quot;:&quot;</span>, X[i].unique())</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true"></a>  <span class="bu">print</span>(<span class="st">&quot;&quot;</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true"></a>  </span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>Unique categorical values for model : [&#39; Fiesta&#39; &#39; Focus&#39; &#39; Puma&#39; &#39; Kuga&#39; &#39; EcoSport&#39; &#39; C-MAX&#39; &#39; Mondeo&#39; &#39; Ka+&#39;
+ &#39; Tourneo Custom&#39; &#39; S-MAX&#39; &#39; B-MAX&#39; &#39; Edge&#39; &#39; Tourneo Connect&#39;
+ &#39; Grand C-MAX&#39; &#39; KA&#39; &#39; Galaxy&#39; &#39; Mustang&#39; &#39; Grand Tourneo Connect&#39;
+ &#39; Fusion&#39; &#39; Ranger&#39; &#39; Streetka&#39; &#39; Escort&#39; &#39; Transit Tourneo&#39; &#39;Focus&#39;]
+Unique numerical values for model : [ 5  6 16 13  2  1 14 12 21 18  0  3 20  9 11  8 15 10  7 17 19  4 22 23]
+
+Unique categorical values for transmission : [&#39;Automatic&#39; &#39;Manual&#39; &#39;Semi-Auto&#39;]
+Unique numerical values for transmission : [0 1 2]
+
+Unique categorical values for fuelType : [&#39;Petrol&#39; &#39;Diesel&#39; &#39;Hybrid&#39; &#39;Electric&#39; &#39;Other&#39;]
+Unique numerical values for fuelType : [4 0 2 1 3]
+
+</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="13" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.578416Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.559810Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.559849Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.579367Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.559436Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true"></a>X</span></code></pre></div>
+<div class="output execute_result" data-execution_count="13">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>model</th>
+      <th>year</th>
+      <th>transmission</th>
+      <th>mileage</th>
+      <th>fuelType</th>
+      <th>tax</th>
+      <th>mpg</th>
+      <th>engineSize</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>5</td>
+      <td>2017</td>
+      <td>0</td>
+      <td>15944</td>
+      <td>4</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6</td>
+      <td>2018</td>
+      <td>1</td>
+      <td>9083</td>
+      <td>4</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>6</td>
+      <td>2017</td>
+      <td>1</td>
+      <td>12456</td>
+      <td>4</td>
+      <td>150</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5</td>
+      <td>2019</td>
+      <td>1</td>
+      <td>10460</td>
+      <td>4</td>
+      <td>145</td>
+      <td>40.3</td>
+      <td>1.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>2019</td>
+      <td>0</td>
+      <td>1482</td>
+      <td>4</td>
+      <td>145</td>
+      <td>48.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>17807</th>
+      <td>0</td>
+      <td>2017</td>
+      <td>1</td>
+      <td>16700</td>
+      <td>4</td>
+      <td>150</td>
+      <td>47.1</td>
+      <td>1.4</td>
+    </tr>
+    <tr>
+      <th>17808</th>
+      <td>0</td>
+      <td>2014</td>
+      <td>1</td>
+      <td>40700</td>
+      <td>4</td>
+      <td>30</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>17809</th>
+      <td>6</td>
+      <td>2015</td>
+      <td>1</td>
+      <td>7010</td>
+      <td>0</td>
+      <td>20</td>
+      <td>67.3</td>
+      <td>1.6</td>
+    </tr>
+    <tr>
+      <th>17810</th>
+      <td>11</td>
+      <td>2018</td>
+      <td>1</td>
+      <td>5007</td>
+      <td>4</td>
+      <td>145</td>
+      <td>57.7</td>
+      <td>1.2</td>
+    </tr>
+    <tr>
+      <th>17811</th>
+      <td>23</td>
+      <td>2015</td>
+      <td>1</td>
+      <td>5007</td>
+      <td>4</td>
+      <td>22</td>
+      <td>57.7</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>17812 rows × 8 columns</p>
+</div>
+</div>
+</div>
+<div class="cell code" data-execution_count="14" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.604046Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.580965Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.581003Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.605585Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.580615Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb20"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true"></a><span class="co">#Performing train_test_split</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true"></a>X_train,X_test,y_train,y_test<span class="op">=</span>train_test_split(X,y,test_size<span class="op">=</span><span class="fl">0.2</span>, shuffle<span class="op">=</span><span class="va">True</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true"></a><span class="bu">print</span>(X_train.shape, y_train.shape)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true"></a><span class="bu">print</span> (X_test.shape, y_test.shape)</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>(14249, 8) (14249,)
+(3563, 8) (3563,)
+</code></pre>
+</div>
+</div>
+<section id="building-and-evaluating-models" class="cell markdown">
+<h1>Building and Evaluating Models</h1>
+<h2 id="1-linear-regression-model">1. Linear Regression Model</h2>
+</section>
+<div class="cell code" data-execution_count="15" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.696981Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.607341Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.607382Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.698101Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.606942Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb22"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true"></a><span class="co"># Instantiate the linear regression model</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true"></a>lin_model <span class="op">=</span> linear_model.LinearRegression()</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true"></a><span class="co"># Fit the linear regression model</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true"></a>lin_model.fit(X_train, y_train)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true"></a>y_pred_l <span class="op">=</span> lin_model.predict(X_test)</span></code></pre></div>
+</div>
+<div class="cell code" data-execution_count="16" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.707479Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.699364Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.699392Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.708729Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.699055Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb23"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true"></a><span class="co">#predict the price of a car:</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true"></a>predictedprice <span class="op">=</span> lin_model.predict([[<span class="dv">5</span>, <span class="dv">2017</span>, <span class="dv">0</span>, <span class="dv">15000</span>, <span class="dv">3</span>, <span class="dv">150</span>, <span class="dv">57</span>, <span class="fl">1.5</span>]])</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true"></a><span class="bu">print</span>(predictedprice.<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>[13819.6]
+</code></pre>
+</div>
+<div class="output stream stderr">
+<pre><code>/usr/local/lib/python3.10/dist-packages/sklearn/base.py:439: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names
+  warnings.warn(
+</code></pre>
+</div>
+</div>
+<div class="cell code" data-execution_count="17" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:25.725462Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.710434Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.710474Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:25.726633Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.710062Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb26"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true"></a><span class="co"># print the model equation</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Intercept: &quot;</span>, lin_model.intercept_)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;&quot;</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Coefficients:&quot;</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true"></a><span class="bu">print</span>(X.columns, lin_model.coef_)</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>Intercept:  -2497784.3508387324
+
+Coefficients:
+Index([&#39;model&#39;, &#39;year&#39;, &#39;transmission&#39;, &#39;mileage&#39;, &#39;fuelType&#39;, &#39;tax&#39;, &#39;mpg&#39;,
+       &#39;engineSize&#39;],
+      dtype=&#39;object&#39;) [ 3.48568914e+01  1.24573650e+03 -2.83782602e+02 -5.61453680e-02
+ -2.92344270e+02  9.33433551e-01 -1.05062528e+02  4.23127129e+03]
+</code></pre>
+</div>
+</div>
+<section id="evaluation" class="cell markdown">
+<h3>Evaluation</h3>
+</section>
+<div class="cell code" data-execution_count="18" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:26.176220Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:25.728292Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:25.728333Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:26.177477Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:25.727790Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb28"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true"></a><span class="co"># Predicted vs. Actual Plot</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true"></a>plt.scatter(y_test, y_pred_l)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true"></a>plt.xlabel(<span class="st">&quot;True Prices&quot;</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true"></a>plt.ylabel(<span class="st">&quot;Predicted Prices&quot;</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true"></a>plt.title(<span class="st">&#39;Predicted vs. Actual Prices Plot&#39;</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true"></a>plt.savefig(<span class="st">&#39;Predicted vs. Actual Prices Plot-Linear.png&#39;</span>)</span></code></pre></div>
+<div class="output display_data">
+<p><img src="0a630bcf3d252c34c8b9306e3d024d1df12a8644.png" /></p>
+</div>
+</div>
+<div class="cell code" data-execution_count="19" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:26.552921Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:26.179272Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:26.179314Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:26.554125Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:26.178857Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb29"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true"></a><span class="co"># Residual Plot</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true"></a>residuals <span class="op">=</span> y_test <span class="op">-</span> y_pred_l</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true"></a>plt.scatter(y_pred_l, residuals)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true"></a>plt.xlabel(<span class="st">&#39;Predicted Prices&#39;</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true"></a>plt.ylabel(<span class="st">&#39;Residuals&#39;</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true"></a>plt.title(<span class="st">&#39;Residual Plot&#39;</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true"></a>plt.axhline(y<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">&#39;r&#39;</span>, linestyle<span class="op">=</span><span class="st">&#39;--&#39;</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true"></a>plt.savefig(<span class="st">&#39;Residual Plot-linear.png&#39;</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true"></a>plt.show()</span></code></pre></div>
+<div class="output display_data">
+<p><img src="9eddbece3966c1f73744987fec007a49cadbbfe9.png" /></p>
+</div>
+</div>
+<div class="cell code" data-execution_count="20" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:26.566454Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:26.555814Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:26.555851Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:26.567763Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:26.555473Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb30"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true"></a><span class="co"># Measure Score</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Score for Linear Regression Model is:&quot;</span>, lin_model.score(X_test, y_test).<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>Score for Linear Regression Model is: 0.71
+</code></pre>
+</div>
+</div>
+<section id="forest-regression-model" class="cell markdown">
+<h2>Forest Regression Model</h2>
+</section>
+<div class="cell code" data-execution_count="21" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:30.619771Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:26.569402Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:26.569438Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:30.620982Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:26.569015Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb32"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true"></a><span class="co"># Instantiate the RandomForestClassifier</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true"></a>forest_model <span class="op">=</span> RandomForestRegressor(n_estimators<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true"></a><span class="co"># Fit the RandomForestClassifier</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true"></a>forest_model.fit(X_train,y_train)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true"></a><span class="co"># prediction on Test Data</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true"></a>y_pred_f <span class="op">=</span> forest_model.predict(X_test)</span></code></pre></div>
+</div>
+<section id="evaluation" class="cell markdown">
+<h3>Evaluation</h3>
+</section>
+<div class="cell code" data-execution_count="22" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:30.932400Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:30.622360Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:30.622389Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:30.933606Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:30.622029Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true"></a><span class="co"># Predicted vs. Actual Plot</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true"></a>plt.scatter(y_test, y_pred_f)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true"></a>plt.xlabel(<span class="st">&quot;True Prices&quot;</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true"></a>plt.ylabel(<span class="st">&quot;Predicted Prices&quot;</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true"></a>plt.title(<span class="st">&#39;Predicted vs. Actual Prices Plot&#39;</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true"></a>plt.savefig(<span class="st">&#39;Predicted vs. Actual Prices Plot-Forest.png&#39;</span>)</span></code></pre></div>
+<div class="output display_data">
+<p><img src="25345654e15cf4abe203b2420eb020e5f03b4d54.png" /></p>
+</div>
+</div>
+<div class="cell code" data-execution_count="23" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:31.251833Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:30.937058Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:30.937081Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:31.252764Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:30.936792Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true"></a><span class="co"># Residual Plot</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true"></a>residuals <span class="op">=</span> y_test <span class="op">-</span> y_pred_f</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true"></a>plt.scatter(y_pred_f, residuals)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true"></a>plt.xlabel(<span class="st">&#39;Predicted Prices&#39;</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true"></a>plt.ylabel(<span class="st">&#39;Residuals&#39;</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true"></a>plt.title(<span class="st">&#39;Residual Plot&#39;</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true"></a>plt.axhline(y<span class="op">=</span><span class="dv">0</span>, color<span class="op">=</span><span class="st">&#39;r&#39;</span>, linestyle<span class="op">=</span><span class="st">&#39;--&#39;</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true"></a>plt.savefig(<span class="st">&#39;Residual Plot-Forest.png&#39;</span>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true"></a>plt.show()</span></code></pre></div>
+<div class="output display_data">
+<p><img src="bc92716ebf0ea743a840ca824feebe85adaecc30.png" /></p>
+</div>
+</div>
+<div class="cell code" data-execution_count="24" data-execution="{&quot;shell.execute_reply&quot;:&quot;2025-02-06T07:22:31.375392Z&quot;,&quot;shell.execute_reply.started&quot;:&quot;2025-02-06T07:22:31.253991Z&quot;,&quot;iopub.execute_input&quot;:&quot;2025-02-06T07:22:31.254013Z&quot;,&quot;iopub.status.idle&quot;:&quot;2025-02-06T07:22:31.376595Z&quot;,&quot;iopub.status.busy&quot;:&quot;2025-02-06T07:22:31.253747Z&quot;}" data-trusted="true">
+<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true"></a><span class="co"># Measure Score</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true"></a><span class="bu">print</span>(<span class="st">&quot;Score for Forest Regression Model is:&quot;</span>, forest_model.score(X_test, y_test).<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div>
+<div class="output stream stdout">
+<pre><code>Score for Forest Regression Model is: 0.93
+</code></pre>
+</div>
+</div>
+<section id="comparison-and-conclusion" class="cell markdown">
+<h1>Comparison and Conclusion</h1>
+<ul>
+<li><strong>Linear Regression (R² = 0.71):</strong> Works but is less accurate due to limitations in capturing complex patterns.</li>
+<li><strong>Random Forest Regression (R² = 0.93):</strong> Performs significantly better due to its ability to handle non-linearity and interactions between variables.</li>
+</ul>
+</section>
